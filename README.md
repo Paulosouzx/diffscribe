@@ -1,4 +1,6 @@
-# Generate-documentation-MCP
+# Diffscribe
+
+**Website:** [diffscribe.online](https://diffscribe.online)
 
 MCP server for Claude Code that turns a Git repository's changes — uncommitted,
 a single commit, or a whole branch — into a structured Markdown documentation
@@ -88,11 +90,23 @@ changes, staged diff taking priority for files with both.
 
 ## Installation
 
+### Option A — run it straight from GitHub (no clone)
+
+Requires [uv](https://docs.astral.sh/uv/). `uvx` downloads and caches the
+package on first launch:
+
+```bash
+claude mcp add --scope user --transport stdio gendoc -- \
+  uvx --from git+https://github.com/Paulosouzx/mcp-gen-documentation.git gendoc-mcp-server
+```
+
+### Option B — clone and install locally
+
 Requires Python 3.10+.
 
 ```bash
-git clone https://github.com/Paulosouzx/Generate-documentation-MCP.git
-cd Generate-documentation-MCP
+git clone https://github.com/Paulosouzx/mcp-gen-documentation.git
+cd mcp-gen-documentation
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -107,7 +121,7 @@ Register it once, at user scope, so it's available in every project:
 
 ```bash
 claude mcp add --scope user --transport stdio gendoc -- \
-  /absolute/path/to/Generate-documentation-MCP/.venv/bin/gendoc-mcp-server
+  /absolute/path/to/mcp-gen-documentation/.venv/bin/gendoc-mcp-server
 ```
 
 Verify it's registered:
