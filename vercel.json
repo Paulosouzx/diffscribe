@@ -1,0 +1,14 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"installCommand": "cd landing && npm ci",
+	"buildCommand": "cd landing && npm run build",
+	"outputDirectory": "landing/dist/client",
+	"cleanUrls": true,
+	"headers": [
+		{
+			"source": "/assets/(.*)",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+		}
+	]
+}
