@@ -1,16 +1,19 @@
 const SCENE_W = 1280;
 const SCENE_H = 800;
-const ROW_H = 11;
-const ROW_COUNT = 132;
-const RISE_SPEED = 7;
 
 type Point = { x: number; y: number };
 
-type DiffRow = {
-	kind: "add" | "del" | "ctx" | "file" | "gap";
-	indent: number;
-	width: number;
-	second: number;
+type Crow = {
+	born: number;
+	x0: number;
+	y0: number;
+	dir: 1 | -1;
+	speed: number;
+	size: number;
+	alpha: number;
+	flapRate: number;
+	phase: number;
+	bob: number;
 };
 
 type Options = {
@@ -184,18 +187,18 @@ function treeLayer(
 
 function paintStatic(ctx: CanvasRenderingContext2D) {
 	const sky = ctx.createLinearGradient(0, 0, 0, SCENE_H);
-	sky.addColorStop(0, "#cfb3d6");
-	sky.addColorStop(0.28, "#dac4df");
-	sky.addColorStop(0.46, "#ccb2d2");
-	sky.addColorStop(0.62, "#a68dae");
-	sky.addColorStop(0.8, "#5b4b63");
-	sky.addColorStop(1, "#2a2230");
+	sky.addColorStop(0, "#0c1628");
+	sky.addColorStop(0.28, "#13243f");
+	sky.addColorStop(0.46, "#1a3052");
+	sky.addColorStop(0.62, "#162a48");
+	sky.addColorStop(0.8, "#0e1a2f");
+	sky.addColorStop(1, "#080e1a");
 	ctx.fillStyle = sky;
 	ctx.fillRect(0, 0, SCENE_W, SCENE_H);
 
 	const glow = ctx.createRadialGradient(660, 280, 40, 660, 280, 620);
-	glow.addColorStop(0, "rgba(238, 230, 244, 0.4)");
-	glow.addColorStop(1, "rgba(238, 230, 244, 0)");
+	glow.addColorStop(0, "rgba(120, 160, 220, 0.24)");
+	glow.addColorStop(1, "rgba(120, 160, 220, 0)");
 	ctx.fillStyle = glow;
 	ctx.fillRect(0, 0, SCENE_W, SCENE_H);
 
@@ -209,16 +212,16 @@ function paintStatic(ctx: CanvasRenderingContext2D) {
 				x,
 				560 + rng() * 20,
 				110 + rng() * 60,
-				"rgba(140, 116, 152, 0.42)",
-				"rgba(150, 120, 164, 0.3)",
+				"rgba(74, 104, 152, 0.42)",
+				"rgba(84, 116, 168, 0.28)",
 			);
 		}
 	});
 
 	const horizon = ctx.createLinearGradient(0, 400, 0, 600);
-	horizon.addColorStop(0, "rgba(212, 198, 220, 0)");
-	horizon.addColorStop(0.55, "rgba(200, 184, 210, 0.42)");
-	horizon.addColorStop(1, "rgba(160, 138, 172, 0.25)");
+	horizon.addColorStop(0, "rgba(96, 132, 190, 0)");
+	horizon.addColorStop(0.55, "rgba(84, 120, 178, 0.32)");
+	horizon.addColorStop(1, "rgba(52, 82, 134, 0.25)");
 	ctx.fillStyle = horizon;
 	ctx.fillRect(0, 400, SCENE_W, 200);
 
@@ -231,27 +234,27 @@ function paintStatic(ctx: CanvasRenderingContext2D) {
 				sx + (rng() - 0.5) * 60,
 				660 + rng() * 20,
 				210 + rng() * 70,
-				"rgba(104, 80, 118, 0.6)",
-				"rgba(116, 88, 132, 0.3)",
+				"rgba(30, 48, 82, 0.72)",
+				"rgba(36, 58, 98, 0.3)",
 			);
 		}
 	});
 
 	const midFog = ctx.createLinearGradient(0, 500, 0, 700);
-	midFog.addColorStop(0, "rgba(150, 128, 162, 0)");
-	midFog.addColorStop(1, "rgba(112, 92, 124, 0.5)");
+	midFog.addColorStop(0, "rgba(40, 62, 102, 0)");
+	midFog.addColorStop(1, "rgba(22, 38, 68, 0.5)");
 	ctx.fillStyle = midFog;
 	ctx.fillRect(0, 500, SCENE_W, 200);
 
 	treeLayer(ctx, 0.5, (layer) => {
-		drawTree(layer, rng, 70, 800, 520, "rgba(76, 58, 88, 0.82)", "rgba(88, 64, 104, 0.3)");
-		drawTree(layer, rng, 1210, 800, 500, "rgba(76, 58, 88, 0.82)", "rgba(88, 64, 104, 0.3)");
+		drawTree(layer, rng, 70, 800, 520, "rgba(12, 22, 42, 0.88)", "rgba(20, 34, 62, 0.3)");
+		drawTree(layer, rng, 1210, 800, 500, "rgba(12, 22, 42, 0.88)", "rgba(20, 34, 62, 0.3)");
 	});
 
 	const ground = ctx.createLinearGradient(0, 580, 0, SCENE_H);
-	ground.addColorStop(0, "rgba(64, 50, 74, 0)");
-	ground.addColorStop(0.55, "rgba(52, 40, 60, 0.7)");
-	ground.addColorStop(1, "rgba(32, 26, 36, 0.95)");
+	ground.addColorStop(0, "rgba(10, 18, 34, 0)");
+	ground.addColorStop(0.55, "rgba(8, 14, 28, 0.7)");
+	ground.addColorStop(1, "rgba(6, 10, 20, 0.95)");
 	ctx.fillStyle = ground;
 	ctx.fillRect(0, 580, SCENE_W, 220);
 
@@ -262,15 +265,51 @@ function paintStatic(ctx: CanvasRenderingContext2D) {
 	}
 }
 
-function paintSideTexture(ctx: CanvasRenderingContext2D) {
+function paintStone(ctx: CanvasRenderingContext2D) {
 	const rng = mulberry32(99);
+
+	ctx.save();
+	quad(ctx, FACE);
+	ctx.clip();
+	const body = ctx.createLinearGradient(0, 150, 0, 840);
+	body.addColorStop(0, "#0a1224");
+	body.addColorStop(0.35, "#0f1a31");
+	body.addColorStop(0.7, "#1a2a46");
+	body.addColorStop(1, "#3a4e70");
+	ctx.fillStyle = body;
+	ctx.fillRect(500, 140, 240, 720);
+
+	const sheen = ctx.createLinearGradient(520, 0, 719, 0);
+	sheen.addColorStop(0, "rgba(255, 255, 255, 0.06)");
+	sheen.addColorStop(0.3, "rgba(255, 255, 255, 0)");
+	sheen.addColorStop(0.85, "rgba(2, 6, 16, 0.2)");
+	sheen.addColorStop(1, "rgba(255, 255, 255, 0.05)");
+	ctx.fillStyle = sheen;
+	ctx.fillRect(500, 140, 240, 720);
+
+	for (let i = 0; i < 2400; i++) {
+		const x = 517 + rng() * 202;
+		const y = 150 + rng() * 690;
+		const r = 0.25 + rng() * 0.7;
+		ctx.fillStyle =
+			rng() < 0.55 ? "rgba(2, 6, 14, 0.28)" : "rgba(160, 186, 226, 0.07)";
+		ctx.fillRect(x, y, r, r);
+	}
+
+	const base = ctx.createLinearGradient(0, 560, 0, 840);
+	base.addColorStop(0, "rgba(90, 120, 170, 0)");
+	base.addColorStop(1, "rgba(90, 120, 170, 0.18)");
+	ctx.fillStyle = base;
+	ctx.fillRect(500, 560, 240, 280);
+	ctx.restore();
+
 	ctx.save();
 	quad(ctx, SIDE);
 	ctx.clip();
 	const side = ctx.createLinearGradient(716, 0, 747, 0);
-	side.addColorStop(0, "#77708a");
-	side.addColorStop(0.5, "#a49cae");
-	side.addColorStop(1, "#8a8296");
+	side.addColorStop(0, "#26364f");
+	side.addColorStop(0.5, "#45597a");
+	side.addColorStop(1, "#324462");
 	ctx.fillStyle = side;
 	ctx.fillRect(700, 160, 60, 700);
 	for (let i = 0; i < 900; i++) {
@@ -278,142 +317,109 @@ function paintSideTexture(ctx: CanvasRenderingContext2D) {
 		const x = 716 + rng() * 32;
 		const r = 0.3 + rng() * 0.9;
 		ctx.fillStyle =
-			rng() < 0.5 ? "rgba(70, 64, 82, 0.35)" : "rgba(214, 206, 220, 0.2)";
+			rng() < 0.5 ? "rgba(10, 18, 34, 0.35)" : "rgba(170, 196, 232, 0.16)";
 		ctx.beginPath();
 		ctx.arc(x, y, r, 0, Math.PI * 2);
 		ctx.fill();
 	}
 	const shade = ctx.createLinearGradient(0, 174, 0, 840);
-	shade.addColorStop(0, "rgba(40, 36, 52, 0.15)");
-	shade.addColorStop(1, "rgba(40, 36, 52, 0)");
+	shade.addColorStop(0, "rgba(6, 12, 24, 0.2)");
+	shade.addColorStop(1, "rgba(6, 12, 24, 0)");
 	ctx.fillStyle = shade;
 	ctx.fillRect(700, 160, 60, 700);
 	ctx.restore();
+
+	const rim = ctx.createLinearGradient(0, 150, 0, 620);
+	rim.addColorStop(0, "rgba(170, 198, 240, 0.32)");
+	rim.addColorStop(1, "rgba(170, 198, 240, 0)");
+	ctx.strokeStyle = rim;
+	ctx.lineWidth = 1.2;
+	ctx.beginPath();
+	ctx.moveTo(FACE[3].x, 620);
+	ctx.lineTo(FACE[0].x, FACE[0].y);
+	ctx.lineTo(FACE[1].x, FACE[1].y);
+	ctx.lineTo(SIDE[1].x, SIDE[1].y);
+	ctx.stroke();
 }
 
-function buildRows(): DiffRow[] {
-	const rng = mulberry32(42);
-	const rows: DiffRow[] = [];
-	for (let i = 0; i < ROW_COUNT; i++) {
-		const r = rng();
-		let kind: DiffRow["kind"];
-		if (i % 22 === 0) kind = "file";
-		else if (i % 22 === 21 || r < 0.06) kind = "gap";
-		else if (r < 0.34) kind = "add";
-		else if (r < 0.52) kind = "del";
-		else kind = "ctx";
-		rows.push({
-			kind,
-			indent: kind === "file" ? 0 : Math.floor(rng() * 3) * 10,
-			width: kind === "file" ? 70 + rng() * 40 : 26 + rng() * 104,
-			second: rng() < 0.35 ? 12 + rng() * 34 : 0,
+function paintSurface(ctx: CanvasRenderingContext2D, t: number) {
+	ctx.save();
+	quad(ctx, FACE);
+	ctx.clip();
+	const sweepY = 150 + ((t * 22) % 980) - 160;
+	const sweep = ctx.createLinearGradient(0, sweepY - 140, 0, sweepY + 140);
+	sweep.addColorStop(0, "rgba(180, 206, 246, 0)");
+	sweep.addColorStop(0.5, "rgba(180, 206, 246, 0.045)");
+	sweep.addColorStop(1, "rgba(180, 206, 246, 0)");
+	ctx.fillStyle = sweep;
+	ctx.fillRect(500, sweepY - 140, 240, 280);
+	ctx.restore();
+}
+
+function spawnFlock(t: number): Crow[] {
+	const dir: 1 | -1 = Math.random() < 0.7 ? 1 : -1;
+	const count = 1 + Math.floor(Math.random() * 5);
+	const y = 90 + Math.random() * 230;
+	const speed = 150 + Math.random() * 90;
+	const depth = 0.6 + Math.random() * 0.4;
+	const flock: Crow[] = [];
+	for (let i = 0; i < count; i++) {
+		flock.push({
+			born: t,
+			x0: (dir === 1 ? -30 : SCENE_W + 30) - dir * (i * (14 + Math.random() * 26)),
+			y0: y + (Math.random() - 0.5) * 50,
+			dir,
+			speed: speed * (0.94 + Math.random() * 0.12),
+			size: (4.2 + Math.random() * 2.2) * depth,
+			alpha: 0.72 + depth * 0.28,
+			flapRate: 9 + Math.random() * 4,
+			phase: Math.random() * Math.PI * 2,
+			bob: Math.random() * Math.PI * 2,
 		});
 	}
-	return rows;
+	return flock;
 }
 
-function paintFace(ctx: CanvasRenderingContext2D, rows: DiffRow[], t: number) {
-	const tl = FACE[0];
-	const tr = FACE[1];
-	const slope = (tr.y - tl.y) / (tr.x - tl.x);
-	const faceW = tr.x - tl.x;
+function paintCrows(ctx: CanvasRenderingContext2D, crows: Crow[], t: number) {
+	for (const c of crows) {
+		const age = t - c.born;
+		const x = c.x0 + c.dir * c.speed * age;
+		const y = c.y0 + Math.sin(age * 1.3 + c.bob) * 4;
+		const gliding = Math.sin(age * 0.9 + c.bob) > 0.55;
+		const wing = gliding ? 0.18 : Math.sin(age * c.flapRate + c.phase);
+		const s = c.size;
+		const tipY = -wing * s * 0.75;
+		const bend = -wing * s * 0.2 - s * 0.12;
 
-	ctx.save();
-	quad(ctx, FACE);
-	ctx.clip();
+		ctx.save();
+		ctx.translate(x, y);
+		ctx.scale(c.dir, 1);
+		ctx.fillStyle = `rgba(2, 4, 9, ${c.alpha})`;
+		ctx.strokeStyle = `rgba(2, 4, 9, ${c.alpha})`;
+		ctx.lineCap = "round";
+		ctx.lineJoin = "round";
 
-	const body = ctx.createLinearGradient(0, 150, 0, 840);
-	body.addColorStop(0, "#2d2942");
-	body.addColorStop(0.35, "#36314d");
-	body.addColorStop(0.7, "#4c4560");
-	body.addColorStop(1, "#7d7385");
-	ctx.fillStyle = body;
-	ctx.fillRect(500, 140, 240, 720);
+		ctx.beginPath();
+		ctx.ellipse(0, 0, s * 0.42, s * 0.14, 0, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.beginPath();
+		ctx.moveTo(-s * 0.35, 0);
+		ctx.lineTo(-s * 0.62, -s * 0.06);
+		ctx.lineTo(-s * 0.62, s * 0.08);
+		ctx.closePath();
+		ctx.fill();
+		ctx.beginPath();
+		ctx.arc(s * 0.42, -s * 0.04, s * 0.11, 0, Math.PI * 2);
+		ctx.fill();
 
-	const sheen = ctx.createLinearGradient(520, 0, 719, 0);
-	sheen.addColorStop(0, "rgba(255, 255, 255, 0.05)");
-	sheen.addColorStop(0.35, "rgba(255, 255, 255, 0)");
-	sheen.addColorStop(0.85, "rgba(10, 8, 20, 0.12)");
-	sheen.addColorStop(1, "rgba(255, 255, 255, 0.06)");
-	ctx.fillStyle = sheen;
-	ctx.fillRect(500, 140, 240, 720);
-
-	ctx.translate(tl.x, tl.y);
-	ctx.transform(1, slope, 0, 1, 0, 0);
-
-	const margin = 18;
-	ctx.fillStyle = "rgba(226, 218, 238, 0.22)";
-	ctx.fillRect(margin, 24, 96, 5);
-	ctx.fillStyle = "rgba(226, 218, 238, 0.1)";
-	ctx.fillRect(margin, 38, 62, 3);
-	ctx.fillRect(margin, 47, 84, 3);
-	ctx.fillRect(margin, 56, 54, 3);
-
-	const top = 76;
-	const bottom = 690;
-	const total = ROW_COUNT * ROW_H;
-	const offset = (t * RISE_SPEED) % total;
-
-	for (let i = 0; i < rows.length; i++) {
-		const row = rows[i];
-		if (!row || row.kind === "gap") continue;
-		let y = top + i * ROW_H - offset;
-		if (y < top - ROW_H) y += total;
-		if (y > bottom) continue;
-
-		const fadeIn = Math.min(1, Math.max(0, (y - top) / 46));
-		const fadeOut = Math.min(1, Math.max(0, (bottom - y) / 240));
-		const a = fadeIn * fadeOut;
-		if (a <= 0.01) continue;
-
-		const x = margin + 10 + row.indent;
-		const maxW = faceW - x - margin;
-		const w = Math.min(row.width, maxW);
-
-		if (row.kind === "file") {
-			ctx.fillStyle = `rgba(232, 226, 242, ${0.26 * a})`;
-			ctx.fillRect(margin, y, 3, 3);
-			ctx.fillRect(margin + 8, y, w, 3.2);
-			continue;
-		}
-
-		let color = `rgba(214, 206, 230, ${0.12 * a})`;
-		if (row.kind === "add") color = `rgba(168, 196, 182, ${0.34 * a})`;
-		if (row.kind === "del") color = `rgba(206, 168, 184, ${0.3 * a})`;
-		ctx.fillStyle = color;
-		ctx.strokeStyle = color;
-		ctx.lineWidth = 1.1;
-
-		if (row.kind !== "ctx") {
-			ctx.beginPath();
-			ctx.moveTo(margin, y + 1.5);
-			ctx.lineTo(margin + 5, y + 1.5);
-			if (row.kind === "add") {
-				ctx.moveTo(margin + 2.5, y - 1);
-				ctx.lineTo(margin + 2.5, y + 4);
-			}
-			ctx.stroke();
-		}
-
-		ctx.fillRect(x, y, w, 3);
-		if (row.second > 0 && x + w + 5 + row.second < faceW - margin) {
-			ctx.fillRect(x + w + 5, y, row.second, 3);
-		}
+		ctx.lineWidth = s * 0.2;
+		ctx.beginPath();
+		ctx.moveTo(-s * 0.95, tipY);
+		ctx.quadraticCurveTo(-s * 0.45, bend, 0, 0);
+		ctx.quadraticCurveTo(s * 0.45, bend, s * 0.95, tipY);
+		ctx.stroke();
+		ctx.restore();
 	}
-
-	ctx.restore();
-
-	ctx.save();
-	quad(ctx, FACE);
-	ctx.clip();
-	const sweepY = 150 + ((t * 26) % 980) - 160;
-	const sweep = ctx.createLinearGradient(0, sweepY - 120, 0, sweepY + 120);
-	sweep.addColorStop(0, "rgba(240, 232, 250, 0)");
-	sweep.addColorStop(0.5, "rgba(240, 232, 250, 0.05)");
-	sweep.addColorStop(1, "rgba(240, 232, 250, 0)");
-	ctx.fillStyle = sweep;
-	ctx.fillRect(500, sweepY - 120, 240, 240);
-	ctx.restore();
 }
 
 function paintMist(ctx: CanvasRenderingContext2D, t: number) {
@@ -427,8 +433,8 @@ function paintMist(ctx: CanvasRenderingContext2D, t: number) {
 		const x = bx + Math.sin(t * 0.09 + phase) * 26;
 		const y = by + Math.cos(t * 0.07 + phase) * 12;
 		const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-		g.addColorStop(0, `rgba(206, 196, 210, ${alpha})`);
-		g.addColorStop(1, "rgba(206, 196, 210, 0)");
+		g.addColorStop(0, `rgba(110, 142, 192, ${alpha})`);
+		g.addColorStop(1, "rgba(110, 142, 192, 0)");
 		ctx.fillStyle = g;
 		ctx.fillRect(x - r, y - r, r * 2, r * 2);
 	}
@@ -440,8 +446,8 @@ function paintMist(ctx: CanvasRenderingContext2D, t: number) {
 	for (const [ox, y, r, alpha] of drift) {
 		const x = ((ox + t * 9) % (SCENE_W + r * 2)) - r;
 		const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-		g.addColorStop(0, `rgba(196, 180, 206, ${alpha})`);
-		g.addColorStop(1, "rgba(196, 180, 206, 0)");
+		g.addColorStop(0, `rgba(92, 126, 182, ${alpha})`);
+		g.addColorStop(1, "rgba(92, 126, 182, 0)");
 		ctx.save();
 		ctx.translate(x, y);
 		ctx.scale(1, 0.32);
@@ -459,9 +465,10 @@ export function mountDocMonolith(canvas: HTMLCanvasElement, options: Options) {
 		return () => {};
 	}
 
-	const rows = buildRows();
 	const backdrop = document.createElement("canvas");
-	const side = document.createElement("canvas");
+	const stone = document.createElement("canvas");
+	let crows: Crow[] = [];
+	let nextFlock = 1.2;
 	let width = 0;
 	let height = 0;
 	let dpr = 1;
@@ -489,19 +496,19 @@ export function mountDocMonolith(canvas: HTMLCanvasElement, options: Options) {
 		canvas.height = Math.round(height * dpr);
 
 		const { scale, ox, oy } = cover();
-		for (const layer of [backdrop, side]) {
+		for (const layer of [backdrop, stone]) {
 			layer.width = canvas.width;
 			layer.height = canvas.height;
 		}
 		const bctx = backdrop.getContext("2d");
-		const sctx = side.getContext("2d");
+		const sctx = stone.getContext("2d");
 		if (bctx) {
 			bctx.setTransform(scale * dpr, 0, 0, scale * dpr, ox * dpr, oy * dpr);
 			paintStatic(bctx);
 		}
 		if (sctx) {
 			sctx.setTransform(scale * dpr, 0, 0, scale * dpr, ox * dpr, oy * dpr);
-			paintSideTexture(sctx);
+			paintStone(sctx);
 		}
 	};
 
@@ -516,11 +523,25 @@ export function mountDocMonolith(canvas: HTMLCanvasElement, options: Options) {
 		ctx.scale(zoom, zoom);
 		ctx.translate(-canvas.width / 2, -canvas.height / 2);
 		ctx.drawImage(backdrop, 0, 0);
-		ctx.drawImage(side, 0, 0);
 
 		const base = ctx.getTransform();
+		if (options.animate) {
+			if (t >= nextFlock) {
+				crows = crows.concat(spawnFlock(t));
+				nextFlock = t + 5 + Math.random() * 9;
+			}
+			crows = crows.filter((c) => {
+				const x = c.x0 + c.dir * c.speed * (t - c.born);
+				return x > -260 && x < SCENE_W + 260;
+			});
+			ctx.transform(scale * dpr, 0, 0, scale * dpr, ox * dpr, oy * dpr);
+			paintCrows(ctx, crows, t);
+			ctx.setTransform(base);
+		}
+
+		ctx.drawImage(stone, 0, 0);
 		ctx.transform(scale * dpr, 0, 0, scale * dpr, ox * dpr, oy * dpr);
-		paintFace(ctx, rows, t);
+		paintSurface(ctx, t);
 		ctx.setTransform(base);
 		ctx.transform(scale * dpr, 0, 0, scale * dpr, ox * dpr, oy * dpr);
 		paintMist(ctx, t);

@@ -762,7 +762,7 @@ body:not(.is-ready) .scroll-down {
 	--mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 	--add: #a8ccb8;
 	--del: #d6a4b6;
-	--lavender: #c6b2ce;
+	--lavender: #a9c4ec;
 	--side-gutter: 0px;
 }
 
@@ -812,7 +812,7 @@ code {
 	padding: clamp(6px, 0.55vw, 8px);
 	overflow: hidden;
 	border-radius: var(--card-radius);
-	background: #f2eff5;
+	background: #eef2f8;
 	color: #3a3f44;
 	font-family: var(--mono);
 	font-size: clamp(5.5px, 0.5vw, 7.4px);
@@ -830,11 +830,11 @@ code {
 	color: #9a3b56;
 }
 .preview__line--hunk {
-	color: #7a6a8c;
+	color: #5f7393;
 }
 .preview__placeholder {
-	background: #e3d9ec;
-	color: #4b3a5c;
+	background: #dbe5f4;
+	color: #2f4566;
 	border-radius: 2px;
 }
 
@@ -843,7 +843,7 @@ code {
 	padding: clamp(84px, 9vw, 140px) calc(var(--page-pad) + var(--side-gutter)) clamp(84px, 9vw, 140px)
 		var(--page-pad);
 	background:
-		radial-gradient(60% 40% at 30% 0%, rgba(160, 128, 180, 0.08), transparent 70%),
+		radial-gradient(60% 40% at 30% 0%, rgba(90, 130, 200, 0.08), transparent 70%),
 		var(--bg);
 	border-top: 1px solid rgba(255, 255, 255, 0.06);
 	scroll-margin-top: 0;
