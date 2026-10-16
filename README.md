@@ -1,6 +1,6 @@
 # Diffscribe
 
-**Website:** [diffscribe.dev](https://diffscribe.dev)
+**Website:** [diffscribe.online](https://diffscribe.online)
 
 MCP server for Claude Code that turns a Git repository's changes — uncommitted,
 a single commit, or a whole branch — into a structured Markdown documentation

@@ -1,8 +1,8 @@
 export const REPO_URL = "https://github.com/Paulosouzx/mcp-gen-documentation";
 export const GIT_URL = `${REPO_URL}.git`;
-export const AUTHOR_SITE = "https://paulosouzx.netlify.app";
+export const AUTHOR_SITE = "https://paulosouza.pt";
 export const AUTHOR_GITHUB = "https://github.com/Paulosouzx";
-export const SITE_URL = "https://diffscribe.dev";
+export const SITE_URL = "https://diffscribe.online";
 
 export const SITE_TITLE = "Diffscribe — Turn your Git diffs into documentation";
 export const SITE_DESCRIPTION =

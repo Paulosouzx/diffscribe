@@ -1,6 +1,6 @@
 # Diffscribe — landing page
 
-Public site for this MCP server, live at [diffscribe.dev](https://diffscribe.dev).
+Public site for this MCP server, live at [diffscribe.online](https://diffscribe.online).
 
 TanStack Start + React 19 + Vite + Tailwind v4, prerendered to static HTML.
 
